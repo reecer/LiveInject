@@ -1,0 +1,17 @@
+{
+  "manifest_version": 2,
+  "name": "LiveInject",
+  "description": "",
+  "version": "0.0.1",
+  "permissions": [
+    "debugger", "tabs"
+  ],
+  "background":{
+    "page": "web/index.html"
+  },
+  "browser_action":{
+    "default_icon": "icons/stopped.png",
+    "default_title": "Enable LiveInject"
+  },
+  "options_page": "web/options.html"
+}
