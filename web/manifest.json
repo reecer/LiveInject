@@ -1,17 +1,19 @@
 {
   "manifest_version": 2,
+  
   "name": "LiveInject",
   "description": "",
   "version": "0.0.1",
+  "content_security_policy": "script-src 'self' 'unsafe-eval'; object-src 'self'",
   "permissions": [
     "debugger", "tabs"
   ],
   "background":{
-    "page": "web/index.html"
+    "scripts": ["main.dart.js"]
   },
   "browser_action":{
     "default_icon": "icons/stopped.png",
     "default_title": "Enable LiveInject"
   },
-  "options_page": "web/options.html"
+  "options_page": "options.html"
 }

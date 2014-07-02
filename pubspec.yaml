@@ -1,4 +1,4 @@
-name: ChromeExtension
+name: LiveInject
 description: A sample web application
 dependencies:
   browser: any
