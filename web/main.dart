@@ -8,13 +8,11 @@ void main() {
     chrome.browserAction.onClicked.listen((tab){
         controller.add(tab);
     });
-    print('Initialized');
 }
 
 
 class Controller{
     List<ClientConnection> tabs;
-
     
     Controller(){
         tabs = new List<ClientConnection>();
@@ -51,15 +49,18 @@ class Controller{
             cc.onOpen.listen((_){
                 cc.setState("running");
                 tabs.add(cc);
+                print("Client opened ${cc.id}");
             });
             cc.onClose.listen((_){
                 cc.setState("stopped");
                 tabs.remove(cc);
+                print("Client closed ${cc.id}");
             });
         }
     }
 
-    void _debugEvent(chrome.onEventEvent e)   => clientById(e.source.tabId).sendMessage({ "method": e.method, "params": e.params });
+    void _debugEvent(chrome.onEventEvent e) => 
+        clientById(e.source.tabId).sendMessage({ "method": e.method, "params": e.params });
     void _debugDetach(chrome.OnDetachEvent e){
         var cc = clientById(e.source.tabId);
         if(cc is ClientConnection){
@@ -70,9 +71,8 @@ class Controller{
 }
 
 class ClientConnection{
-    // final String host = "ws://echo.websocket.org";
-    static String host = "ws://localhost:4040/";
-
+    final String host = "ws://localhost:4040/";
+    final String protocol = "1.0";
 
     StreamController _closed = new StreamController.broadcast();
     StreamController _opened = new StreamController.broadcast();
@@ -80,13 +80,10 @@ class ClientConnection{
     Stream get onClose => _closed.stream;
     Stream get onOpen => _opened.stream;
 
-    // Remote dbg protocol
-    final String protocol = "1.0";
-
     // Tab being used
     chrome.Tab tab;
 
-    // tab's tabId
+    // Tab's tabId
     int id; 
 
     // WS client
@@ -103,15 +100,9 @@ class ClientConnection{
         try{
             this.ws = new WebSocket(host + this.id.toString())
                 ..onOpen.listen((e){
+                    attach();
                     _opened.add(null);
-                    sendMessage({"method": 'Tab.attached', "params": {
-                        "title": this.tab.title,
-                        "url": this.tab.url,
-                        "id": this.tab.id
-                    }});
-                    chrome.debugger.attach(debuggee, protocol);
-                    attached = true;
-                    print('Added tab $debuggee');
+                    print('Synced tab $debuggee');
                 })
                 ..onMessage.listen((e){
                     var msg = JSON.decode(e.data);
@@ -126,6 +117,19 @@ class ClientConnection{
         }catch(e){
             close();
         }
+    }
+
+    void attach(){
+        sendMessage({
+            "method": 'Tab.attached', 
+            "params": {
+                "title": this.tab.title,
+                "url"  : this.tab.url,
+                "id"   : this.tab.id
+            }
+        });
+        chrome.debugger.attach(this.debuggee, protocol);
+        attached = true;
     }
 
     bool get connected => ws != null && ws.readyState == WebSocket.OPEN;

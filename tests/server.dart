@@ -7,14 +7,15 @@ void main(){
 		print('Serving');
 		s.onConnection.listen((WipConnection wip){
 			print("New debug connection");
-			wip.debugger.enable();
-			
-			
-			// wip.runtime.enable();
-			// wip.runtime.evaluate("1+1").then((e){
-			// 	print('Evaluation: ');
-			// 	print(e);
-			// });
+            // wip.page.enable();
+            // wip.debugger.enable();
+            wip.runtime.enable();
+            
+            
+			wip.runtime.evaluate("(1+1)").then((e){
+				print('Evaluation: ');
+				print(e);
+			});
 		});
 	});
 }
